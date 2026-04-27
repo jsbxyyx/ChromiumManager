@@ -3,15 +3,10 @@ name: Windows Build CI
 on:
   workflow_dispatch:
     inputs:
-      chromium_tag:
-        description: 'Chromium release tag (leave empty to use current ref)'
+      chromium_url:
+        description: 'Direct download URL for Chromium Windows zip (leave empty to skip bundling)'
         required: false
         default: ''
-      include_chromium:
-        description: 'Bundle Chromium binary in zip'
-        type: boolean
-        required: false
-        default: true
 
 jobs:
   build-windows:
@@ -53,23 +48,11 @@ jobs:
           CGO_ENABLED: '0'
         run: go build -ldflags="-s -w" -o manager.exe .
 
-      - name: Determine Chromium tag
-        if: inputs.include_chromium
-        id: tag
-        run: |
-          TAG="${{ inputs.chromium_tag }}"
-          if [ -z "$TAG" ]; then
-            TAG="${{ github.ref_name }}"
-          fi
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-
       - name: Download Chromium Windows binary
-        if: inputs.include_chromium
-        uses: robinraju/release-downloader@v1
-        with:
-          tag: ${{ steps.tag.outputs.tag }}
-          fileName: 'ungoogled-chromium-*_windows.zip'
-          out-file-path: chromium-tmp
+        if: inputs.chromium_url != ''
+        run: |
+          mkdir -p chromium-tmp
+          curl -L -o chromium-tmp/chromium-windows.zip "${{ inputs.chromium_url }}"
 
       - name: Assemble package
         run: |
@@ -85,11 +68,8 @@ jobs:
           pause
           EOF
 
-          if [ "${{ inputs.include_chromium }}" = "true" ]; then
-            ZIPFILE=$(ls chromium-tmp/ungoogled-chromium-*_windows.zip 2>/dev/null | head -1)
-            if [ -n "$ZIPFILE" ]; then
-              unzip -q "$ZIPFILE" -d "$PKG/bin/chromium/"
-            fi
+          if [ -f chromium-tmp/chromium-windows.zip ]; then
+            unzip -q chromium-tmp/chromium-windows.zip -d "$PKG/bin/chromium/"
           fi
 
           cd dist
