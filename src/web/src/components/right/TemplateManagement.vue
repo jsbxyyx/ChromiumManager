@@ -346,9 +346,9 @@ function defaultFp() {
     location: '',
     disableFingerprint: [],
     randomFingerprint: true,
-    proxyLang: true,
-    proxyTimezone: true,
-    proxyLocation: true
+    proxyLang: false,
+    proxyTimezone: false,
+    proxyLocation: false
   }
 }
 

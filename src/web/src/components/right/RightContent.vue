@@ -509,7 +509,7 @@ const listView = computed(() => {
       ip: proxy ? proxy.ip || fp.ip || '' : fp.ip || '',
       lang: proxy && fp.proxyLang ? proxy.lang || fp.lang || '' : fp.lang || '',
       timezone: proxy && fp.proxyTimezone ? proxy.timezone || fp.timezone || '' : fp.timezone || '',
-      location: proxy ? proxy.location || '' : ''
+      location: proxy && fp.proxyLocation ? proxy.location || fp.location || '' : fp.location || ''
     }
   })
 })
@@ -561,9 +561,9 @@ const defaultFp = () => ({
   location: '',
   disableFingerprint: [],
   randomFingerprint: true,
-  proxyLang: true,
-  proxyTimezone: true,
-  proxyLocation: true
+  proxyLang: false,
+  proxyTimezone: false,
+  proxyLocation: false
 })
 
 const buildPayload = () => {
